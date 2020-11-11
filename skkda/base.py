@@ -20,7 +20,7 @@ from sklearn.metrics.pairwise import (chi2_kernel, laplacian_kernel,
                                       linear_kernel, polynomial_kernel,
                                       rbf_kernel, sigmoid_kernel)
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
+from sklearn.utils.validation import check_array, check_is_fitted, check_X_y  # noqa: F401
 
 
 class KernelDiscriminantAnalysis(BaseEstimator, ClassifierMixin,
@@ -47,7 +47,7 @@ class KernelDiscriminantAnalysis(BaseEstimator, ClassifierMixin,
         self.gamma = gamma
         self.coef0 = coef0
 
-    def _kernel(self, X, Y=None):
+    def _kernel(self, X, Y=None):  # noqa: N803
         """Kernel"""
         kernel = None
         if self.kernel == 'chi2':
@@ -65,7 +65,7 @@ class KernelDiscriminantAnalysis(BaseEstimator, ClassifierMixin,
             kernel = sigmoid_kernel(X, Y, gamma=self.gamma, coef0=self.coef0)
         return kernel
 
-    def fit(self, X, y):
+    def fit(self, X, y):  # noqa: N803
         """Fit KFDA model.
 
         Parameters
@@ -85,19 +85,19 @@ class KernelDiscriminantAnalysis(BaseEstimator, ClassifierMixin,
         self._H = np.identity(n) - 1 / n * np.ones(n) @ np.ones(n).T
         self._E = OneHotEncoder().fit_transform(y.reshape(n, 1))
         _, counts = np.unique(y, return_counts=True)
-        K = self._kernel(X)
-        C = self._H @ K @ self._H
+        K = self._kernel(X)  # noqa: N806
+        C = self._H @ K @ self._H  # noqa: N806
         self._Delta = np.linalg.inv(C + self.lmb * np.identity(n))
-        A = self._E.T @ C
-        B = self._Delta @ self._E
+        A = self._E.T @ C  # noqa: N806
+        B = self._Delta @ self._E  # noqa: N806
         self._Pi_12 = np.diag(np.sqrt(1.0 / counts))
-        P = self._Pi_12 @ A
-        Q = B @ self._Pi_12
-        R = P @ Q
-        V, self._Gamma, self._U = np.linalg.svd(R, full_matrices=False)
+        P = self._Pi_12 @ A  # noqa: N806
+        Q = B @ self._Pi_12  # noqa: N806
+        R = P @ Q  # noqa: N806
+        V, self._Gamma, self._U = np.linalg.svd(R, full_matrices=False)  # noqa: N806
         return self
 
-    def transform(self, X):
+    def transform(self, X):  # noqa: N803
         """Transform data with the trained KFDA model.
 
         Parameters
@@ -111,9 +111,9 @@ class KernelDiscriminantAnalysis(BaseEstimator, ClassifierMixin,
                 Transformations for X.
 
         """
-        _K = self._kernel(X, self._X)
-        K = _K - np.mean(_K, axis=0)
-        C = self._H @ K.T
-        T = self._U @ self._Pi_12 @ self._E.T @ self._Delta
-        Z = T @ C
+        _K = self._kernel(X, self._X)  # noqa: N806
+        K = _K - np.mean(_K, axis=0)  # noqa: N806
+        C = self._H @ K.T  # noqa: N806
+        T = self._U @ self._Pi_12 @ self._E.T @ self._Delta  # noqa: N806
+        Z = T @ C  # noqa: N806
         return Z.T
